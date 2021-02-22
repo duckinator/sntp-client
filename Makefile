@@ -1,5 +1,5 @@
 CC := clang
-CFLAGS := -Wall -Weverything -pedantic-errors -Wno-missing-prototypes
+CFLAGS := -Wall -Weverything -pedantic-errors -Wno-missing-prototypes -Wno-cast-align
 
 all: sntp
 

@@ -7,12 +7,10 @@
 #include <unistd.h> /* for close() */
 #include <stdlib.h>
 
-int socket_create(const char *server, int port) {
+int socket_create(const char *server, char *port) {
     int sock = -1;
     struct addrinfo hints = {0};
     struct addrinfo *result = NULL;
-    char port_s[10] = "";
-    snprintf(port_s, sizeof(port_s), "%u", (unsigned int)port);
 
     hints.ai_family = AF_UNSPEC; // Allow IPv4 or IPv6.
     hints.ai_socktype = SOCK_DGRAM; // UDP.
@@ -20,7 +18,7 @@ int socket_create(const char *server, int port) {
     hints.ai_flags = 0;
     hints.ai_protocol = 0; // Any protocol.
 
-    int gaddr_error = getaddrinfo(server, port_s, &hints, &result);
+    int gaddr_error = getaddrinfo(server, port, &hints, &result);
     if (gaddr_error != 0) {
         fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(gaddr_error));
         exit(EXIT_FAILURE);
@@ -48,7 +46,7 @@ int socket_create(const char *server, int port) {
 
     if (rp == NULL) {
         // Every address failed.
-        fprintf(stderr, "Could not connect to address %s on port %s.", server, port_s);
+        fprintf(stderr, "Could not connect to address %s on port %s.", server, port);
         exit(EXIT_FAILURE);
     }
 
