@@ -5,42 +5,13 @@
 #include <string.h>
 #include <time.h>
 #include "socket.h"
+#include "sntp.h"
 
 // The delta is negative, so be sure to invert any operations on it.
 static uint32_t NTP_TIMESTAMP_DELTA = 2208988800;
 static uint8_t SNTP_CLIENT_MODE = 3;
 static uint8_t SNTP_VERSION = 4 << 3;
 
-typedef struct NtpTimestamp_s {
-    uint32_t seconds;
-    uint32_t seconds_fraction;
-} NtpTimestamp;
-
-typedef struct NtpPacket_s {
-    // LI, VN, and Mode are 3 different things.
-    uint8_t li_vn_mode;
-    uint8_t stratum;
-    uint8_t poll;
-    uint8_t precision;
-    uint32_t root_delay;
-    uint32_t root_dispersion;
-    uint32_t ref_id;
-    uint64_t ref_timestamp;
-    uint64_t origin_timestamp;
-    uint64_t recv_timestamp;
-    uint64_t tx_timestamp;
-/*
-    uint32_t key_id; // optional
-    uint64_t msg_digest_1; // optional
-    uint64_t msg_digest_2; // optional
-*/
-} NtpPacket;
-
-typedef struct NtpResult_s {
-    NtpTimestamp timestamp;
-    NtpTimestamp delay;
-    NtpTimestamp offset;
-} NtpResult;
 
 uint64_t _htonll(uint64_t n) {
     uint32_t *bytes = (uint32_t*)&n;
@@ -169,6 +140,10 @@ void sntp_request(NtpResult *result, int debug, const char *server, char *port) 
 
     int sock = socket_create(server, port);
 
+    if (debug) {
+        fprintf(stderr, "Connected to %s on port %s.\n", server, port);
+    }
+
     socket_write(sock, &request, sizeof(NtpPacket));
     socket_read(sock, &response, sizeof(NtpPacket));
     correct_endianness(&request);
@@ -205,10 +180,4 @@ void sntp_request(NtpResult *result, int debug, const char *server, char *port) 
     memcpy((void*)&result->timestamp, timestamp, sizeof(NtpTimestamp));
     memcpy((void*)&result->delay, &delay, sizeof(NtpTimestamp));
     memcpy((void*)&result->offset, &offset, sizeof(NtpTimestamp));
-}
-
-int main() {
-    NtpResult result = {0};
-    sntp_request(&result, 0, "pool.ntp.org", "123");
-    printf("%u.%u\n", result.timestamp.seconds, result.timestamp.seconds_fraction);
 }
