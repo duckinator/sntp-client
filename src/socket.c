@@ -1,6 +1,3 @@
-#!/usr/bin/env cci
-// cci: -Wall -Weverything -pedantic-errors -Wno-missing-prototypes
-
 #include <stdio.h>
 #include <errno.h>
 #include <sys/types.h>
@@ -9,7 +6,6 @@
 #include <netinet/in.h>
 #include <unistd.h> /* for close() */
 #include <stdlib.h>
-#include <string.h>
 
 int socket_create(const char *server, int port) {
     int sock = -1;
@@ -77,42 +73,4 @@ void socket_read(int sock, void *buf, size_t nbyte) {
         perror("read");
         exit(EXIT_FAILURE);
     }
-}
-
-#define BUF_SIZE (64 / 8)
-
-typedef struct {
-    // LI, VN, and Mode are 3 different things.
-    uint8_t li_vn_mode;
-    uint8_t stratum;
-    uint8_t poll;
-    uint8_t precision;
-    uint32_t root_delay;
-    uint32_t root_dispersion;
-    uint32_t ref_id;
-    uint64_t ref_timestamp;
-    uint64_t origin_timestamp;
-    uint64_t recv_timestamp;
-    uint64_t tx_timestamp;
-
-    uint32_t key_id; // optional
-    uint64_t msg_digest_1; // optional
-    uint64_t msg_digest_2; // optional
-} NtpPacket;
-
-int main() {
-    char *server = "pool.ntp.org";
-    int port = 123;
-
-    char *request = "Hello!";
-    char response[BUF_SIZE] = {0};
-
-    int sock = socket_create(server, port);
-
-    socket_write(sock, request, strlen(request) + 1);
-    socket_read(sock, response, BUF_SIZE);
-
-    printf("buf = '%s'\n", response);
-
-    return 0;
 }
