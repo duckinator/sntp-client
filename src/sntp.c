@@ -108,7 +108,7 @@ void calculate_delay(NtpTimestamp *delay, NtpTimestamp *offset,
     offset->seconds_fraction = offset_ts->seconds_fraction;
 }
 
-uint64_t ntp_time() {
+uint64_t ntp_time(void) {
     return (uint64_t)time(NULL) + NTP_TIMESTAMP_DELTA;
 }
 
